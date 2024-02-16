@@ -1,0 +1,122 @@
+alias Basket1 d0
+alias Basket2 d1
+alias Speaker d2
+alias Switch d3
+alias Annul1 d4
+alias Annul2 d5
+
+alias Launched r0
+alias OldScore1 r1
+alias NewScore1 r2
+alias OldScore2 r3
+alias NewScore2 r4
+alias Loop r5
+alias Var r15
+
+define Light HASH("StructureLightLongWide")
+define Light1 HASH("Basket Light White")
+define Light2 HASH("Basket Light Orange")
+define Door HASH("StructureGlassDoor")
+define LED HASH("StructureDiode")
+
+move Launched 0
+move OldScore1 1
+move NewScore1 1
+move OldScore2 1
+move NewScore2 1
+
+s Speaker On 0
+s Speaker Volume 100
+s Speaker Mode 45
+s Basket1 On 0
+s Basket1 Setting 0
+s Basket2 On 0
+s Basket2 Setting 0
+sb Light Lock 1
+sb Light On 0
+sb Door On 1
+sb Door Mode 0
+sb Door Lock 0
+sb Door Open 1
+sb LED Lock 0
+sb LED On 1
+
+main:
+yield
+l Var Switch Setting
+xor Var Launched Var
+beqz Var noChange
+beqz Launched start
+j stop
+noChange:
+beqz Launched main
+l NewScore1 Basket1 Setting
+l NewScore2 Basket2 Setting
+bneal OldScore1 NewScore1 score
+bneal OldScore2 NewScore2 score
+l Var Annul1 Setting
+bnezal Var annul1
+l Var Annul2 Setting
+bnezal Var annul2
+j main
+
+score:
+move OldScore1 NewScore1
+move OldScore2 NewScore2
+j sound
+
+sound:
+s Speaker On 1
+sbn Light Light1 On 1
+sbn Light Light2 On 0
+yield
+sbn Light Light1 On 0
+sbn Light Light2 On 1
+yield
+s Speaker On 0
+sbn Light Light1 On 1
+sbn Light Light2 On 0
+yield
+sbn Light Light1 On 0
+sbn Light Light2 On 1
+yield
+sbn Light Light1 On 1
+sbn Light Light2 On 1
+j ra
+
+start:
+s Basket1 On 1
+s Basket1 Setting 0
+s Basket2 On 1
+s Basket2 Setting 0
+sb Door Open 0
+sb Door Lock 1
+sb LED On 0
+move Launched 1
+jal sound
+j main
+
+stop:
+s Basket1 On 0
+s Basket2 On 0
+sb Light On 0
+move Launched 0
+sb Door Open 1
+sb Door Lock 0
+sb LED On 1
+yield
+j main
+
+annul1:
+sub OldScore1 OldScore1 2
+move NewScore1 OldScore1
+s Basket1 Setting OldScore1
+yield
+j ra
+
+annul2:
+sub OldScore2 OldScore2 2
+move NewScore2 OldScore2
+s Basket2 Setting OldScore2
+yield
+j ra
