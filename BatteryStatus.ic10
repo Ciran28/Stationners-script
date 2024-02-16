@@ -1,0 +1,67 @@
+define ItemBattery HASH("StructureBattery")
+define ItemBatteryLarge HASH("StructureBatteryLarge")
+
+alias DisplayBattery d0
+alias DisplayInput d1
+alias DisplayOutput d2
+alias CableAnalyser d3
+
+alias TotalCharge1 r0
+alias TotalCharge2 r1
+alias GlobalCharge r2
+alias TotalCapacity1 r3
+alias TotalCapacity2 r4
+alias GlobalCapacity r5
+alias Battery r6
+alias GlobalPowerActual r7
+alias PowerActual1 r8
+alias PowerActual2 r9
+alias PowerActualInput r10
+alias ColorBattery r11
+
+s DisplayBattery On 1
+s DisplayBattery Mode 1
+s DisplayInput On 1
+s DisplayInput Mode 2
+s DisplayOutput On 1
+s DisplayOutput Mode 2
+
+main:
+lb TotalCharge1 ItemBattery Charge 1
+lb TotalCharge2 ItemBatteryLarge Charge 1
+lb TotalCapacity1 ItemBattery Maximum 1
+lb TotalCapacity2 ItemBatteryLarge Maximum 1
+lb PowerActual1 ItemBattery PowerActual 1
+lb PowerActual2 ItemBatteryLarge PowerActual 1
+l PowerActualInput CableAnalyser PowerActual
+
+add GlobalCharge TotalCharge1 TotalCharge2
+add GlobalCapacity TotalCapacity1 TotalCapacity2
+div Battery GlobalCharge GlobalCapacity
+
+add GlobalPowerActual PowerActual1 PowerActual2
+
+s DisplayBattery Setting Battery
+s DisplayInput Setting PowerActualInput
+s DisplayOutput Setting GlobalPowerActual
+
+blt Battery 0.25 red
+blt Battery 0.50 orange
+blt Battery 0.75 yellow
+blt Battery 1 green
+s DisplayBattery Color 0
+j end
+red:
+s DisplayBattery Color 4
+j end
+orange:
+s DisplayBattery Color 3
+j end
+yellow:
+s DisplayBattery Color 5
+j end
+green:
+s DisplayBattery Color 2
+end:
+yield
+j main
