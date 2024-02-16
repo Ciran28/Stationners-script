@@ -1,0 +1,105 @@
+alias BlastDoor d0
+alias Switch1 d1
+alias Switch2 d2
+alias GasSensor d3
+alias Speaker d5
+alias Loop r0
+alias CombustionStatus r1
+alias VolatileStatus r2
+alias PressureLow r3
+alias PressureHigh r4
+alias ActualPressure r5
+alias Status r6
+alias SwitchStatus r7
+
+define Flash HASH("StructureFlashingLight")
+define FlashName HASH("Flashing Light Blast Door 1")
+
+sbn Flash FlashName Lock 1
+s Speaker Volume 100
+s Switch1 Open 0
+s Switch2 Open 0
+s Switch1 Lock 0
+s Switch2 Lock 0
+jal openDoor
+move Status 0
+
+main:
+yield
+l SwitchStatus Switch1 Open
+bne SwitchStatus Status mismatch
+l SwitchStatus Switch2 Open
+bne SwitchStatus Status mismatch
+l CombustionStatus GasSensor Combustion
+l VolatileStatus GasSensor RatioVolatiles
+l ActualPressure GasSensor Pressure
+slt PressureLow ActualPressure 50
+sgt PressureHigh ActualPressure 150
+bnez CombustionStatus prob
+bnez VolatileStatus prob
+bnez PressureLow prob
+bnez PressureHigh prob
+s Switch1 Lock 0
+s Switch2 Lock 0
+j main
+prob:
+s Switch1 Lock 1
+s Switch2 Lock 1
+beqz Status mismatch1
+j main
+
+mismatch:
+beqz Status mismatch1
+move Status 0
+jal openDoor
+j main
+mismatch1:
+move Status 1
+jal closeDoor
+j main
+
+closeDoor:
+s BlastDoor Open 0
+s BlastDoor Lock 1
+sbn Flash FlashName On 1
+s Switch1 Open 1
+s Switch2 Open 1
+bnez CombustionStatus modeAlarm1
+bnez VolatileStatus modeAlarm2
+bnez PressureLow modeAlarm3
+bnez PressureHigh modeAlarm4
+j alarmEnd
+modeAlarm1:
+move Loop 4
+s Speaker Mode 28
+j startLoop
+modeAlarm2:
+move Loop 5
+s Speaker Mode 43
+j startLoop
+modeAlarm3:
+move Loop 4
+s Speaker Mode 40
+j startLoop
+modeAlarm4:
+move Loop 4
+s Speaker Mode 39
+startLoop:
+s Speaker On 1
+loop:
+sub Loop Loop 1
+yield
+bnez Loop loop
+alarmEnd:
+s Speaker Mode 2
+s Speaker On 1
+j ra
+
+openDoor:
+s BlastDoor Lock 0
+s BlastDoor Open 1
+sbn Flash FlashName On 0
+s Speaker On 0
+s Switch1 Open 0
+s Switch2 Open 0
+j ra
