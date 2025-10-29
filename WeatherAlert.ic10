@@ -1,0 +1,52 @@
+define ItemFlashingLight HASH("StructureFlashingLight")
+define ItemSpeaker HASH("StructureKlaxon")
+define ItemLED HASH("StructureConsoleLED5")
+define ItemDoor HASH("StructureCompositeDoor")
+define FlashingLight HASH("Flashing Light Storm")
+define Speaker HASH("Klaxon Speaker Storm")
+define LED HASH("Secondes avant tempete")
+
+alias Station d0
+alias Status r0
+
+sbn ItemFlashingLight FlashingLight Lock 1
+sbn ItemSpeaker Speaker Volume 100
+sbn ItemFlashingLight FlashingLight On 0
+sbn ItemSpeaker Speaker On 0
+sbn ItemLED LED On 0
+s Station Lock 1
+s Station On 1
+
+move Status 0
+
+main:
+l r1 Station NextWeatherEventTime
+sbn ItemLED LED Setting r1
+l r1 Station Mode
+beq r1 Status end
+move Status r1
+breq r1 1 4
+breq r1 2 ledOff
+breq r1 0 alarmOff
+j end
+sbn ItemDoor HASH("Salle batterie") Open 0
+sbn ItemDoor HASH("Salle solaire") Open 0
+sbn ItemFlashingLight FlashingLight On 1
+sbn ItemSpeaker Speaker Mode 18
+sbn ItemSpeaker Speaker On 1
+sleep 2
+sbn ItemSpeaker Speaker Mode 6
+sleep 20
+sbn ItemSpeaker Speaker Mode 18
+sleep 2
+sbn ItemSpeaker Speaker On 0
+sbn ItemLED LED On 1
+j end
+alarmOff:
+sbn ItemFlashingLight FlashingLight On 0
+j end
+ledOff:
+sbn ItemLED LED On 0
+end:
+yield
+j main
