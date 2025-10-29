@@ -5,6 +5,8 @@ alias DisplayBattery d0
 alias DisplayInput d1
 alias DisplayOutput d2
 alias CableAnalyser d3
+alias Generator d4
+alias FlashingLight d5
 
 alias TotalCharge1 r0
 alias TotalCharge2 r1
@@ -31,15 +33,15 @@ lb TotalCharge1 ItemBattery Charge 1
 lb TotalCharge2 ItemBatteryLarge Charge 1
 lb TotalCapacity1 ItemBattery Maximum 1
 lb TotalCapacity2 ItemBatteryLarge Maximum 1
-lb PowerActual1 ItemBattery PowerActual 1
-lb PowerActual2 ItemBatteryLarge PowerActual 1
+lb PowerActual1 ItemBattery PowerActual 3
+lb PowerActual2 ItemBatteryLarge PowerActual 3
 l PowerActualInput CableAnalyser PowerActual
 
 add GlobalCharge TotalCharge1 TotalCharge2
 add GlobalCapacity TotalCapacity1 TotalCapacity2
 div Battery GlobalCharge GlobalCapacity
 
-add GlobalPowerActual PowerActual1 PowerActual2
+max GlobalPowerActual PowerActual1 PowerActual2
 
 s DisplayBattery Setting Battery
 s DisplayInput Setting PowerActualInput
@@ -50,18 +52,40 @@ blt Battery 0.50 orange
 blt Battery 0.75 yellow
 blt Battery 1 green
 s DisplayBattery Color 0
-j end
+j endcol
 red:
 s DisplayBattery Color 4
-j end
+j endcol
 orange:
 s DisplayBattery Color 3
-j end
+j endcol
 yellow:
 s DisplayBattery Color 5
-j end
+j endcol
 green:
 s DisplayBattery Color 2
-end:
+endcol:
+
+brle Battery 0.01 2
+j checkPower
+brlt PowerActualInput GlobalPowerActual 2
+j checkPower
+s Generator On 1
+checkPower:
+bge Battery 0.20 genOff
+sub r12 PowerActualInput 20000
+bgt r12 GlobalPowerActual genOff
+jr 3
+genOff:
+s Generator On 0
+
+ls r12 Generator 0 Occupied
+beq r12 1 lightOff
+s FlashingLight On 1
+j lightEnd
+lightOff:
+s FlashingLight On 0
+lightEnd:
+
 yield
 j main
